@@ -6,8 +6,6 @@ from dash import html
 from dash import dcc
 from dash.dependencies import Input, Output, State
 from pgmpy.inference import VariableElimination
-from pgmpy.models import BayesianNetwork
-from pgmpy.estimators import MaximumLikelihoodEstimator
 
 #Estilo
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -196,7 +194,6 @@ def inference(evidence):
     prob=infer.query(variables=['num_discreta'], evidence=evidence)
     return prob.values.tolist()
 
-# NO SE QUE ES ESTO--------------------------------------------------------------------------------------------------------------------
 # Agregar todo al layout
 app.layout = html.Div(children=[
     title_container,
@@ -218,12 +215,20 @@ app.layout = html.Div(children=[
      Input('input-cp', 'value')]
 )
 
-
 def actualizar_output(n_clicks, input_edad, input_sex, input_thal, input_slope, input_oldpeak, input_exang, input_ca, input_cp):
+    evidence = {'age': discretizar_age(input_edad),
+                'sex': input_sex,
+                'thal': input_thal,
+                'slope': input_slope,
+                'oldpeak': discretizar_oldpeak(input_oldpeak),
+                'exang': input_exang,
+                'ca': input_ca,
+                'cp': input_cp
+                }
     if n_clicks is not None:
-        resultado = calcular_probabilidad(input_edad, input_sex, input_thal, input_slope, input_oldpeak, input_exang, input_ca, input_cp)
+        resultado = inference(evidence)
         return resultado
-
+    
 # Correr la aplicación Dash
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -8,14 +8,13 @@ from dash.dependencies import Input, Output, State
 from pgmpy.inference import VariableElimination
 from pgmpy.models import BayesianNetwork
 from pgmpy.estimators import MaximumLikelihoodEstimator
+import dash_bootstrap_components as dbc
 
 #Estilo
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# Crear la aplicación Dash
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-#Ponemos el path indicando que esta es la page de inicio
-dash.register_page(__name__, path='/')
+# Crear la aplicación Dash
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets,use_pages=True)
 
 # Crear variables para cada una de las variables
 edad = dcc.Input(id='input-edad', type='number', placeholder='Inserte Edad')
@@ -31,82 +30,118 @@ cp = dcc.Input(id='input-cp', type='number', placeholder='Inserte Cp')
 # Crear contenedor para el título
 title_container = html.Div(
     children=[        html.Div(children=[            
-        html.H1(children='Predictor de enfermedades cardíacas - Home Test', style={'fontSize':50, 'text-align': 'center'})        ], 
-        style={'background-color': '#dfe6f2', 'padding': '10px', 'border-radius': '5px'})
+        html.H1(children='Home Test: Predictor de enfermedades cardíacas', style={'font-weight': 'bold','fontSize':40, 'text-align': 'center'})        ], 
+        style={'background-color': '#dfe6f2', 'padding': '30px', 'border-radius': '5px'}),
+        html.Div([
+            dcc.Link(page['name']+ " | ", href=page['path'])
+            for page in dash.page_registry.values()
+        ]),
+        html.Hr(),
+
+        #Contenido pags
+        dash.page_container
     ]
 )
 
 subtitle_container = html.Div(
     children=[
-        html.H2(children='Responda en cada una de las siguientes casillas con sus datos')
+        html.H2(children='Responda en cada una de las siguientes casillas con sus datos, tenga en cuenta que debe tener conocimiento de sus resultados tras un examen previo, conteste con total sinceridad',
+                style={'fontSize':30, 'text-align': 'center'}),
+
+            
     ]
 )
 
 # Crear contenedor para los inputbox
 input_container = html.Div(
+    className="input-container",
     children=[
-        html.Table([
-            html.Thead([
-                html.Tr([
-                    html.Th("Variable"),
-                    html.Th("Valor"),
-                    html.Th("Instrucciones")
-                ])
-            ]),
-            html.Tbody([
-                html.Tr([
-                    html.Td("Edad"),
-                    html.Td(edad),
-                    html.Td("Ingrese su edad en años")
-                ]),
-                html.Tr([
-                    html.Td("Sexo"),
-                    html.Td(sex),
-                    html.Td("Ingrese su sexo formato binario (M=1/F=0)")
-                ]),
-                html.Tr([
-                    html.Td("Thal"),
-                    html.Td(thal),
-                    html.Td("Ingrese el tipo de defecto talámico (3/6/7)")
-                ]),
-                html.Tr([
-                    html.Td("Slope"),
-                    html.Td(slope),
-                    html.Td("Ingrese el tipo de la pendiente del segmento ST (0/1/2)")
-                ]),
-                html.Tr([
-                    html.Td("Oldpeak"),
-                    html.Td(oldpeak),
-                    html.Td("Ingrese la depresión del segmento ST inducida por el ejercicio en relación con el reposo (0.0 a 6.2)")
-                ]),
-                html.Tr([
-                    html.Td("Exang"),
-                    html.Td(exang),
-                    html.Td("Ingrese si hay presencia de angina inducida por ejercicio (0 = no, 1 = si)")
-                ]),
-                html.Tr([
-                    html.Td("Ca"),
-                    html.Td(ca),
-                    html.Td("Ingrese el número de vasos principales coloreados por flourosopía (0/1/2/3)")
-                ]),
-                html.Tr([
-                    html.Td("Cp"),
-                    html.Td(cp),
-                    html.Td("Ingrese el tipo de dolor torácico (0/1/2/3)")
-                ])
-            ])
-        ])
-    ]
-)
-
-# Crear contenedor para el resultado
-resultado_container = html.Div(
-    children=[
-        html.Br(),
-        html.Button('Evaluar riesgo de enfermedad', id='boton_calcular', n_clicks=0),
-        html.Br(), # Agregar espacio vacío
-        html.Br(),
-        html.Div(id="resultado") # Aquí se mostrará el resultado
+        html.Table(
+            className="input-table",
+            children=[
+                html.Thead(
+                    className="input-header",
+                    children=[
+                        html.Tr(
+                            children=[
+                                html.Th("Variable", className="input-header-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Th("Valor", className="input-header-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Th("Instrucciones", className="input-header-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        )
+                    ]
+                ),
+                html.Tbody(
+                    className="input-body",
+                    children=[
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Edad", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(edad, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese su edad en años", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Sexo", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(sex, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese su sexo formato binario (M=1/F=0)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Thal", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(thal, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese el tipo de defecto talámico (3/6/7)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Slope", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(slope, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese el tipo de la pendiente del segmento ST (0/1/2)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Oldpeak", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(oldpeak, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese la depresión del segmento ST inducida por el ejercicio en relación con el reposo (0.0 a 6.2)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Exang", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(exang, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese si hay presencia de angina inducida por ejercicio (0 = no, 1 = si)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Ca", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(ca, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese el número de vasos principales coloreados por flourosopía (0/1/2/3)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        ),
+                        html.Tr(
+                            className="input-row",
+                            children=[
+                                html.Td("Cp", className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td(cp, className="input-item", style={'fontSize':20, 'text-align': 'center'}),
+                                html.Td("Ingrese el tipo de dolor torácico (0/1/2/3)", className="input-item", style={'fontSize':20, 'text-align': 'center'})
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
     ]
 )
 
@@ -207,17 +242,9 @@ def inference(evidence):
                  f' |  Probabilidad de tener enfermedad: {prob_list[1]:.2f}']
     return prob_text
 
-
-# Agregar todo al layout
-app.layout = html.Div(children=[
-    title_container,
-    subtitle_container,
-    input_container,
-    resultado_container
-])
-#Callbacks para conectar botón con función
+# Callback para conectar botón con función
 @app.callback(
-    Output('resultado', 'children'),
+    Output('resultado-container', 'children'),
     Input('boton_calcular', 'n_clicks'),
     [Input('input-edad', 'value'),
      Input('input-sex', 'value'),
@@ -228,8 +255,6 @@ app.layout = html.Div(children=[
      Input('input-ca', 'value'),
      Input('input-cp', 'value')]
 )
-
-
 def actualizar_output(n_clicks, input_edad, input_sex, input_thal, input_slope, input_oldpeak, input_exang, input_ca, input_cp):
 
     values = {
@@ -243,15 +268,10 @@ def actualizar_output(n_clicks, input_edad, input_sex, input_thal, input_slope, 
         'cp': input_cp
     }
 
-    print(values)
-
     valuesNone = dict()
     for key, value in values.items():
         if value != '' and value is not None:
             valuesNone[key] = value
-
-    
-    print(valuesNone)
 
     evidence = dict()
     for (key, value) in valuesNone.items():
@@ -261,13 +281,41 @@ def actualizar_output(n_clicks, input_edad, input_sex, input_thal, input_slope, 
             
         if key == 'oldpeak':
             evidence[key] = discretizar_oldpeak(value)
-            
-
 
     if n_clicks is not None:
         resultado = inference(evidence)
-        return (html.P(resultado, style={'font-size': '20px'}))
+        return html.Div([
+                    html.Div([
+                        html.H2('Resultado', style={'font-weight': 'bold', 'text-align': 'center'}),
+                        html.Hr()
+                    ], className="card-header"),
+                    html.Div([                        
+                        html.H5(f'Su riesgo es: {resultado}', style={'font-weight': 'bold','text-align': 'center'})
+                    ], className="card-body")
+                ], className="card")
 
-# Correr la aplicación Dash
-if __name__ == '__main__':
-    app.run_server(debug=True,host = '127.0.0.1')
+
+
+# Crear contenedor para el resultado
+resultado_container = html.Div(
+    children=[
+        html.Br(),
+        html.Button('Evaluar riesgo de enfermedad', id='boton_calcular', n_clicks=0),
+        html.Br(), # Agregar espacio vacío
+        html.Br(),
+        html.Div(id="resultado-container") # Contenedor para mostrar el resultado
+    ]
+)
+
+
+# Agregar todo al layout
+app.layout = html.Div(children=[
+    title_container,
+    subtitle_container,
+    input_container,
+    resultado_container # Contenedor de resultado debajo del contenedor de entrada
+])
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
